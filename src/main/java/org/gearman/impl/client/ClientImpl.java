@@ -441,33 +441,39 @@ public class ClientImpl extends AbstractJobServerPool<ClientImpl.InnerConnection
 
 	@Override
 	public GearmanJobReturn submitJob(String functionName, byte[] data) {
-		return submitJob(functionName, data, GearmanJobPriority.NORMAL_PRIORITY, false);
+		return submitJob(functionName, data, GearmanJobPriority.NORMAL_PRIORITY, false, null);
 	}
 
 	@Override
 	public GearmanJobReturn submitJob(String functionName, byte[] data, GearmanJobPriority priority) {
-		return submitJob(functionName, data, priority, false);
+		return submitJob(functionName, data, priority, false, null);
 	}
 
 	@Override
 	public GearmanJobReturn submitBackgroundJob(String functionName, byte[] data) {
-		return submitJob(functionName, data, GearmanJobPriority.NORMAL_PRIORITY, true);
+		return submitJob(functionName, data, GearmanJobPriority.NORMAL_PRIORITY, true, null);
 	}
 
 	@Override
 	public GearmanJobReturn submitBackgroundJob(String functionName, byte[] data, GearmanJobPriority priority) {
-		return submitJob(functionName, data, priority, true);
+		return submitJob(functionName, data, priority, true, null);
 	}
-	
-	private GearmanJobReturn submitJob(String functionName, byte[] data, GearmanJobPriority priority, boolean isBackground) {
+
+	@Override
+	public GearmanJobReturn submitBackgroundJob(String functionName, byte[] data, byte[] jobId) {
+		return submitJob(functionName, data, GearmanJobPriority.NORMAL_PRIORITY, true, jobId);
+	}
+
+	private GearmanJobReturn submitJob(String functionName, byte[] data, GearmanJobPriority priority, boolean isBackground, byte[] jobId) {
 		final GearmanJobReturnImpl jobReturn = new GearmanJobReturnImpl();
-		submitJob(jobReturn, functionName, data, priority, isBackground);
+		submitJob(jobReturn, functionName, data, priority, isBackground, jobId);
 		return jobReturn;
 	}
 	
-	private void submitJob(BackendJobReturn jobReturn, String functionName, byte[] data, GearmanJobPriority priority, boolean isBackground) {
+	private void submitJob(BackendJobReturn jobReturn, String functionName, byte[] data, GearmanJobPriority priority, boolean isBackground, byte[] jobId) {
 		if(functionName==null) throw new NullPointerException();
 		if(data==null) data = new byte[0];
+		if(jobId==null) jobId = GearmanUtils.createUID();
 		if(priority==null) priority = GearmanJobPriority.NORMAL_PRIORITY;
 		
 		if(this.isShutdown()) {
@@ -478,7 +484,7 @@ public class ClientImpl extends AbstractJobServerPool<ClientImpl.InnerConnection
 			return;
 		}
 		
-		this.addJob(new ClientJobSubmission(functionName, data, GearmanUtils.createUID() , jobReturn, priority, isBackground));
+		this.addJob(new ClientJobSubmission(functionName, data, jobId , jobReturn, priority, isBackground));
 	}
 
 	@Override
@@ -505,7 +511,7 @@ public class ClientImpl extends AbstractJobServerPool<ClientImpl.InnerConnection
 		if(callback==null) throw new NullPointerException();
 		
 		final GearmanJobEventCallbackCaller<A> jobReturn = new GearmanJobEventCallbackCaller<A>(attachment, callback, this.getGearman().getScheduler());
-		submitJob(jobReturn, functionName, data, priority, isBackground);
+		submitJob(jobReturn, functionName, data, priority, isBackground, null);
 		return jobReturn;
 	}
 }

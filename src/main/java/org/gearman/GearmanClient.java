@@ -173,7 +173,22 @@ public interface GearmanClient extends GearmanService {
 	 * 		if the function name or callback is <code>null</code>
 	 */
 	public <A> GearmanJoin<A> submitBackgroundJob(String functionName, byte[] data, GearmanJobPriority priority, A attachment, GearmanJobEventCallback<A> callback);
-	
+
+	/**
+	 * Submits a background job to a registered job server
+	 * @param functionName
+	 * 		gearman function name
+	 * @param data
+	 * 		gearman job data
+	 * @param jobId
+	 * 		gearman job id
+	 * @return
+	 * 		The job return used to poll submit operation status
+	 * @throws NullPointerException
+	 * 		If the function name is <code>null</code>
+	 */
+	public GearmanJobReturn submitBackgroundJob(String functionName, byte[] data, byte[] jobId);
+
 	/**
 	 * Adds a {@link GearmanServer} to the service.<br>
 	 * <br>
