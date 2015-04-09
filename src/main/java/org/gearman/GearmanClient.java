@@ -43,8 +43,6 @@ public interface GearmanClient extends GearmanService {
 	 * 		The job handle of the of the job in question. 
 	 * @return
 	 * 		The job status of the job in question.
-	 * @throws IOException
-	 * 		If an I/O exception occurs while performing this operation 
 	 */
 	public GearmanJobStatus getStatus(byte[] jobHandle);
 	
